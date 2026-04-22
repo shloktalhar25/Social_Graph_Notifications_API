@@ -1,0 +1,10 @@
+test_output_exp
+pass
+proj_structure
+venv/
+cdk.out/
+__pycache__/
+*.pyc
+.DS_Store
+.idea/
+.vscode/

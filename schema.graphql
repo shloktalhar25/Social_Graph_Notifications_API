@@ -1,0 +1,96 @@
+# schema.graphql
+
+# ── Auth directives ──────────────────────────────────────────
+# @aws_cognito_user_pools  = logged-in users only
+# @aws_iam                 = internal Lambda/IAM only
+# Both on a field = either auth mode works
+
+# ── Types ────────────────────────────────────────────────────
+
+type User {
+  userId: ID!
+  username: String!
+  email: String!
+  fullName: String
+  createdAt: AWSDateTime!
+}
+
+type FollowRelation {
+  userId: ID!
+  username: String!
+  status: FollowStatus!
+  createdAt: AWSDateTime!
+}
+
+type Notification {
+  notificationId: ID!
+  recipientId: ID!
+  senderId: ID!
+  senderUsername: String!
+  type: NotificationType!
+  message: String!
+  createdAt: AWSDateTime!
+  read: Boolean!
+}
+
+enum FollowStatus {
+  PENDING
+  ACCEPTED
+}
+
+enum NotificationType {
+  FOLLOW_REQUEST
+  FOLLOW_ACCEPTED
+}
+
+# ── Queries ───────────────────────────────────────────────────
+
+type Query {
+  # Get my followers (users who follow me)
+  getMyFollowers: [FollowRelation!]!
+    @aws_cognito_user_pools
+
+  # Get my followings (users I follow)
+  getMyFollowings: [FollowRelation!]!
+    @aws_cognito_user_pools
+
+  # Get my notifications
+  getMyNotifications: [Notification!]!
+    @aws_cognito_user_pools
+}
+
+# ── Mutations ─────────────────────────────────────────────────
+
+type Mutation {
+  # Send a follow request to another user
+  requestFollow(targetUserId: ID!): FollowRelation!
+    @aws_cognito_user_pools
+
+  # Accept a follow request (only the recipient can do this)
+  acceptFollowRequest(requesterId: ID!): FollowRelation!
+    @aws_cognito_user_pools
+
+  # Internal only — used by notification processor Lambda via IAM
+  createNotification(
+    recipientId: ID!
+    senderId: ID!
+    senderUsername: String!
+    type: NotificationType!
+    message: String!
+  ): Notification!
+    @aws_iam
+}
+
+# ── Subscriptions ─────────────────────────────────────────────
+
+type Subscription {
+  # Requester listens for their follow request being accepted
+  onFollowAccepted(requesterId: ID!): FollowRelation
+    @aws_subscribe(mutations: ["acceptFollowRequest"])
+    @aws_cognito_user_pools
+
+  # User listens for new notifications addressed to them
+  onNewNotification(recipientId: ID!): Notification
+    @aws_subscribe(mutations: ["createNotification"])
+    @aws_cognito_user_pools @aws_iam
+}
