@@ -46,6 +46,7 @@ class DynamoDBStack(Stack):
             ),
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
             removal_policy=RemovalPolicy.DESTROY,
+            stream=dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
         )
 
         # GSI to query followers direction (who follows a given user)

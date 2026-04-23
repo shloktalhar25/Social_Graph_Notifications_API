@@ -4,6 +4,7 @@ from aws_cdk import (
     aws_appsync as appsync,
     aws_lambda as _lambda,
     aws_iam as iam,
+    aws_sqs as sqs,
     Duration,
 )
 from constructs import Construct
@@ -19,17 +20,32 @@ class AppSyncStack(Stack):
         user_table,
         follow_table,
         notification_table,
-        notification_queue,       # ← added: SQS queue reference
-        **kwargs
+        search_fn,
+        **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # ── Shared Lambda environment ─────────────────────────────────
+        # ── SQS Queue lives here — same stack as resolvers that publish to it
+        dlq = sqs.Queue(
+            self, "NotificationDLQ",
+            queue_name="social-notif-dlq",
+            retention_period=Duration.days(14),
+        )
+        self.notification_queue = sqs.Queue(
+            self, "NotificationQueue",
+            queue_name="social-notifi-queue",
+            visibility_timeout=Duration.seconds(60),
+            dead_letter_queue=sqs.DeadLetterQueue(
+                max_receive_count=3,
+                queue=dlq,
+            ),
+        )
+
         shared_env = {
-            "USER_TABLE_NAME":          user_table.table_name,
-            "FOLLOW_TABLE_NAME":        follow_table.table_name,
-            "NOTIFICATION_TABLE_NAME":  notification_table.table_name,
-            "NOTIFICATION_QUEUE_URL":   notification_queue.queue_url,
+            "USER_TABLE_NAME":         user_table.table_name,
+            "FOLLOW_TABLE_NAME":       follow_table.table_name,
+            "NOTIFICATION_TABLE_NAME": notification_table.table_name,
+            "NOTIFICATION_QUEUE_URL":  self.notification_queue.queue_url,
         }
 
         # ── AppSync API ───────────────────────────────────────────────
@@ -57,8 +73,7 @@ class AppSyncStack(Stack):
         )
 
         # ── Lambda Functions ──────────────────────────────────────────
-
-        request_follow_fn = _lambda.Function(
+        self.request_follow_fn = _lambda.Function(
             self, "RequestFollowFn",
             function_name="social-request-follow",
             runtime=_lambda.Runtime.PYTHON_3_10,
@@ -68,7 +83,7 @@ class AppSyncStack(Stack):
             environment=shared_env,
         )
 
-        accept_follow_fn = _lambda.Function(
+        self.accept_follow_fn = _lambda.Function(
             self, "AcceptFollowFn",
             function_name="social-accept-follow",
             runtime=_lambda.Runtime.PYTHON_3_10,
@@ -108,70 +123,75 @@ class AppSyncStack(Stack):
             environment=shared_env,
         )
 
+        create_notification_fn = _lambda.Function(
+            self, "CreateNotificationFn",
+            function_name="social-create-notification",
+            runtime=_lambda.Runtime.PYTHON_3_10,
+            handler="handler.lambda_handler",
+            code=_lambda.Code.from_asset("functions/resolvers/create_notification"),
+            timeout=Duration.seconds(10),
+            environment=shared_env,
+        )
+
         # ── IAM Grants ────────────────────────────────────────────────
+        user_table.grant_read_data(self.request_follow_fn)
+        follow_table.grant_read_write_data(self.request_follow_fn)
+        self.notification_queue.grant_send_messages(self.request_follow_fn)
 
-        # follow mutations need read+write on follow + user tables
-        user_table.grant_read_data(request_follow_fn)
-        follow_table.grant_read_write_data(request_follow_fn)
-        notification_queue.grant_send_messages(request_follow_fn)
+        user_table.grant_read_data(self.accept_follow_fn)
+        follow_table.grant_read_write_data(self.accept_follow_fn)
+        self.notification_queue.grant_send_messages(self.accept_follow_fn)
 
-        user_table.grant_read_data(accept_follow_fn)
-        follow_table.grant_read_write_data(accept_follow_fn)
-        notification_queue.grant_send_messages(accept_follow_fn)
-
-        # queries are read-only
         follow_table.grant_read_data(get_followers_fn)
         follow_table.grant_read_data(get_followings_fn)
         notification_table.grant_read_data(get_notifications_fn)
+        notification_table.grant_write_data(create_notification_fn)
 
-        # ── AppSync Data Sources (Lambda) ─────────────────────────────
+        # ── AppSync Data Sources ──────────────────────────────────────
+        request_follow_ds      = self.api.add_lambda_data_source("RequestFollowDS",      self.request_follow_fn)
+        accept_follow_ds       = self.api.add_lambda_data_source("AcceptFollowDS",       self.accept_follow_fn)
+        get_followers_ds       = self.api.add_lambda_data_source("GetFollowersDS",       get_followers_fn)
+        get_followings_ds      = self.api.add_lambda_data_source("GetFollowingsDS",      get_followings_fn)
+        get_notifications_ds   = self.api.add_lambda_data_source("GetNotificationsDS",   get_notifications_fn)
+        create_notification_ds = self.api.add_lambda_data_source("CreateNotificationDS", create_notification_fn)
+        search_ds              = self.api.add_lambda_data_source("SearchResolverDS",     search_fn)
 
-        request_follow_ds = self.api.add_lambda_data_source(
-            "RequestFollowDS", request_follow_fn
-        )
-        accept_follow_ds = self.api.add_lambda_data_source(
-            "AcceptFollowDS", accept_follow_fn
-        )
-        get_followers_ds = self.api.add_lambda_data_source(
-            "GetFollowersDS", get_followers_fn
-        )
-        get_followings_ds = self.api.add_lambda_data_source(
-            "GetFollowingsDS", get_followings_fn
-        )
-        get_notifications_ds = self.api.add_lambda_data_source(
-            "GetNotificationsDS", get_notifications_fn
-        )
-
-        # ── Resolvers: attach data source to schema operations ────────
-
+        # ── Resolvers ─────────────────────────────────────────────────
         request_follow_ds.create_resolver(
             "RequestFollowResolver",
-            type_name="Mutation",
-            field_name="requestFollow",
+            type_name="Mutation", field_name="requestFollow",
         )
         accept_follow_ds.create_resolver(
             "AcceptFollowResolver",
-            type_name="Mutation",
-            field_name="acceptFollowRequest",
+            type_name="Mutation", field_name="acceptFollowRequest",
         )
         get_followers_ds.create_resolver(
             "GetFollowersResolver",
-            type_name="Query",
-            field_name="getMyFollowers",
+            type_name="Query", field_name="getMyFollowers",
         )
         get_followings_ds.create_resolver(
             "GetFollowingsResolver",
-            type_name="Query",
-            field_name="getMyFollowings",
+            type_name="Query", field_name="getMyFollowings",
         )
         get_notifications_ds.create_resolver(
             "GetNotificationsResolver",
-            type_name="Query",
-            field_name="getMyNotifications",
+            type_name="Query", field_name="getMyNotifications",
+        )
+        create_notification_ds.create_resolver(
+            "CreateNotificationResolver",
+            type_name="Mutation", field_name="createNotification",
+        )
+        search_ds.create_resolver(
+            "SearchFollowersResolver",
+            type_name="Query", field_name="searchMyFollowers",
+        )
+        search_ds.create_resolver(
+            "SearchFollowingsResolver",
+            type_name="Query", field_name="searchMyFollowings",
         )
 
-        # ── Outputs ───────────────────────────────────────────────────
+        self.api_id = self.api.api_id
+
         cdk.CfnOutput(self, "GraphQLApiUrl", value=self.api.graphql_url)
         cdk.CfnOutput(self, "GraphQLApiId",  value=self.api.api_id)
-        #cdk.CfnOutput(self,"GraphQLApiUrl",value=self.api.graphql_url)
-
+        cdk.CfnOutput(self, "NotificationQueueUrl", value=self.notification_queue.queue_url)

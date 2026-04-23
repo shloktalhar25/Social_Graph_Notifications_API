@@ -57,6 +57,13 @@ type Query {
   # Get my notifications
   getMyNotifications: [Notification!]!
     @aws_cognito_user_pools
+
+  searchMyFollowers(searchTerm: String!): [FollowRelation!]!
+    @aws_cognito_user_pools
+  
+  searchMyFollowings(searchTerm: String!): [FollowRelation!]!
+    @aws_cognito_user_pools
+
 }
 
 # ── Mutations ─────────────────────────────────────────────────

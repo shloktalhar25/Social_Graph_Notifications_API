@@ -1,18 +1,43 @@
 import os
-import boto3
 import json
-import uuid
-from datetime import datetime, timezone
+import boto3
+import requests
+from requests_aws4auth import AWS4Auth
 
-dynamodb = boto3.resource("dynamodb")
-notification_table = dynamodb.Table(os.environ["NOTIFICATION_TABLE_NAME"])
+APPSYNC_URL = os.environ["APPSYNC_API_URL"]
+REGION      = os.environ.get("AWS_REGION", "us-east-1")
+
+credentials = boto3.Session().get_credentials()
+awsauth = AWS4Auth(
+    refreshable_credentials=credentials,
+    region=REGION,
+    service="appsync",
+)
+
+CREATE_NOTIFICATION_MUTATION = """
+mutation CreateNotification(
+  $recipientId: ID!
+  $senderId: ID!
+  $senderUsername: String!
+  $type: NotificationType!
+  $message: String!
+) {
+  createNotification(
+    recipientId: $recipientId
+    senderId: $senderId
+    senderUsername: $senderUsername
+    type: $type
+    message: $message
+  ) {
+    notificationId
+    type
+    createdAt
+  }
+}
+"""
 
 
 def lambda_handler(event, context):
-    """
-    Consumes SQS messages and writes notification records to DynamoDB.
-    Uses partial batch failure reporting — failed messages return to queue.
-    """
     failed_items = []
 
     for record in event["Records"]:
@@ -24,33 +49,35 @@ def lambda_handler(event, context):
             print(f"ERROR processing message {message_id}: {e}")
             failed_items.append({"itemIdentifier": message_id})
 
-    # Return failed message IDs so SQS retries only those
     return {"batchItemFailures": failed_items}
 
 
 def _process_notification(body: dict):
-    event_type = body["eventType"]
-    recipient_id = body["recipientId"]
-    sender_id = body["senderId"]
+    event_type      = body["eventType"]
+    recipient_id    = body["recipientId"]
+    sender_id       = body["senderId"]
     sender_username = body["senderUsername"]
-    message = body["message"]
+    message         = body["message"]
 
-    now = datetime.now(timezone.utc).isoformat()
-    notif_id = str(uuid.uuid4())
-
-    notification_table.put_item(
-        Item={
-            "PK": f"USER#{recipient_id}",
-            "SK": f"NOTIF#{now}#{notif_id}",
-            "notificationId": notif_id,
-            "recipientId": recipient_id,
-            "senderId": sender_id,
-            "senderUsername": sender_username,
-            "type": event_type,           # FOLLOW_REQUEST or FOLLOW_ACCEPTED
-            "message": message,
-            "read": False,
-            "createdAt": now,
-            "entityType": "NOTIFICATION",
-        }
+    response = requests.post(
+        APPSYNC_URL,
+        json={
+            "query": CREATE_NOTIFICATION_MUTATION,
+            "variables": {
+                "recipientId":    recipient_id,
+                "senderId":       sender_id,
+                "senderUsername": sender_username,
+                "type":           event_type,
+                "message":        message,
+            },
+        },
+        auth=awsauth,
+        headers={"Content-Type": "application/json"},
+        timeout=10,
     )
-    print(f"Notification written: {event_type} for user {recipient_id}")
+
+    data = response.json()
+    if "errors" in data:
+        raise Exception(f"AppSync mutation failed: {data['errors']}")
+
+    print(f"Notification created via AppSync: {event_type} for {recipient_id}")
