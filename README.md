@@ -3,6 +3,27 @@
 A production-oriented GraphQL backend for a social application built on AWS. Supports user management, a bidirectional follow system with request/accept flow, asynchronous real-time notifications, and full-text search powered by Amazon OpenSearch Service.
 
 ---
+# Request Flow: Follow System
+
+1. Client sends `requestFollow` mutation via AppSync
+2. Resolver validates caller identity from JWT
+3. Follow record is written to DynamoDB (status = PENDING)
+4. Message is pushed to SQS queue
+5. Notification processor Lambda consumes message
+6. Lambda triggers AppSync `createNotification` mutation (IAM-auth)
+7. Notification stored in DynamoDB
+
+---
+
+# Request Flow: Accept Follow
+
+1. Target user calls `acceptFollowRequest`
+2. Resolver verifies requester identity
+3. DynamoDB record updated (status = ACCEPTED)
+4. DynamoDB Stream triggers OpenSearch sync Lambda
+5. Lambda indexes updated relationship into OpenSearch
+
+---
 
 ## Stack
 
