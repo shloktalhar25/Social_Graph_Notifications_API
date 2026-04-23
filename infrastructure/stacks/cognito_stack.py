@@ -20,8 +20,7 @@ class CognitoStack(Stack):
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # ── Post Confirmation Lambda ──────────────────────────────────
-        # Fires after a user confirms signup → saves profile to DynamoDB
+        # Post Confirmation Lambda
         self.post_confirmation_fn = _lambda.Function(
             self, "PostConfirmationFn",
             function_name="social-post-confirmation",
@@ -37,7 +36,7 @@ class CognitoStack(Stack):
         # Grant Lambda permission to write to the Users table
         user_table.grant_write_data(self.post_confirmation_fn)
 
-        # ── Cognito User Pool ─────────────────────────────────────────
+        # Cognito User Pool
         self.user_pool = cognito.UserPool(
             self, "SocialUserPool",
             user_pool_name="social-graph-user-pool",
@@ -66,8 +65,7 @@ class CognitoStack(Stack):
             ),
         )
 
-        # ── User Pool Client ──────────────────────────────────────────
-        # The "app client" — used by AppSync and test scripts to auth
+        # User Pool Client
         self.user_pool_client = self.user_pool.add_client(
             "SocialAppClient",
             user_pool_client_name="social-app-client",

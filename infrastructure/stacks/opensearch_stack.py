@@ -19,7 +19,7 @@ class OpenSearchStack(Stack):
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # ── Service-Linked Role ───────────────────────────────────────
+        # Service-Linked Role
         # Required for VPC-placed OpenSearch domains.
         # Will fail if it already exists — that's fine, ignore the error.
         # slr = iam.CfnServiceLinkedRole(
@@ -27,7 +27,7 @@ class OpenSearchStack(Stack):
         #     aws_service_name="es.amazonaws.com",
         # )
 
-        # ── OpenSearch Domain ─────────────────────────────────────────
+        # OpenSearch Domain
         # 2x t3.small.search nodes across 2 AZs → green cluster health
         # Not publicly accessible — IAM-only access policy
         self.domain = opensearch.Domain(

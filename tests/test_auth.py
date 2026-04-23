@@ -61,11 +61,11 @@ def get_token(user: dict) -> str:
 
 
 if __name__ == "__main__":
-    print("\n── Creating test users ──────────────────────")
+    print("\nCreating test users")
     alice_id = create_and_confirm_user(USER_ALICE)
     bob_id   = create_and_confirm_user(USER_BOB)
 
-    print("\n── Getting tokens ───────────────────────────")
+    print("\nGetting tokens")
     
 
     alice_token = get_token(USER_ALICE)

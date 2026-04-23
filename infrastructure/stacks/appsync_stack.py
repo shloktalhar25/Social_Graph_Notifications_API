@@ -25,7 +25,7 @@ class AppSyncStack(Stack):
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # ── SQS Queue lives here — same stack as resolvers that publish to it
+        # SQS Queue
         dlq = sqs.Queue(
             self, "NotificationDLQ",
             queue_name="social-notif-dlq",
@@ -48,7 +48,7 @@ class AppSyncStack(Stack):
             "NOTIFICATION_QUEUE_URL":  self.notification_queue.queue_url,
         }
 
-        # ── AppSync API ───────────────────────────────────────────────
+        # AppSync API
         self.api = appsync.GraphqlApi(
             self, "SocialGraphApi",
             name="social-graph-api",
@@ -72,7 +72,7 @@ class AppSyncStack(Stack):
             xray_enabled=True,
         )
 
-        # ── Lambda Functions ──────────────────────────────────────────
+        # Lambda Functions
         self.request_follow_fn = _lambda.Function(
             self, "RequestFollowFn",
             function_name="social-request-follow",
@@ -133,7 +133,7 @@ class AppSyncStack(Stack):
             environment=shared_env,
         )
 
-        # ── IAM Grants ────────────────────────────────────────────────
+        # IAM Grants
         user_table.grant_read_data(self.request_follow_fn)
         follow_table.grant_read_write_data(self.request_follow_fn)
         self.notification_queue.grant_send_messages(self.request_follow_fn)
@@ -147,7 +147,7 @@ class AppSyncStack(Stack):
         notification_table.grant_read_data(get_notifications_fn)
         notification_table.grant_write_data(create_notification_fn)
 
-        # ── AppSync Data Sources ──────────────────────────────────────
+        # Data Sources
         request_follow_ds      = self.api.add_lambda_data_source("RequestFollowDS",      self.request_follow_fn)
         accept_follow_ds       = self.api.add_lambda_data_source("AcceptFollowDS",       self.accept_follow_fn)
         get_followers_ds       = self.api.add_lambda_data_source("GetFollowersDS",       get_followers_fn)
@@ -156,7 +156,7 @@ class AppSyncStack(Stack):
         create_notification_ds = self.api.add_lambda_data_source("CreateNotificationDS", create_notification_fn)
         search_ds              = self.api.add_lambda_data_source("SearchResolverDS",     search_fn)
 
-        # ── Resolvers ─────────────────────────────────────────────────
+        # Resolvers
         request_follow_ds.create_resolver(
             "RequestFollowResolver",
             type_name="Mutation", field_name="requestFollow",

@@ -46,15 +46,13 @@ def poll_notifications(user_id: str, expected_type: str, retries=6, delay=5) -> 
 
 
 if __name__ == "__main__":
-    print("\n── Setup ────────────────────────────────────")
+    print("\nSetup")
     alice_token = get_token(USER_ALICE)
     bob_token   = get_token(USER_BOB)
     alice_id    = get_user_id(USER_ALICE["username"])
     bob_id      = get_user_id(USER_BOB["username"])
 
-    # ── Test 1: Bob receives FOLLOW_REQUEST notification ──────
-    # (triggered when Alice sends a follow request)
-    print("\n── Test 1: Bob gets FOLLOW_REQUEST notification ─")
+    print("\nTest 1: Bob gets FOLLOW_REQUEST notification")
     print("  Waiting for SQS → Lambda → DynamoDB...")
     notif = poll_notifications(bob_id, "FOLLOW_REQUEST")
     print(f"  Notification: {json.dumps(notif, indent=2, default=str)}")
@@ -62,16 +60,14 @@ if __name__ == "__main__":
     assert notif["read"] == False
     print("Bob received FOLLOW_REQUEST notification")
 
-    # ── Test 2: Alice receives FOLLOW_ACCEPTED notification ───
-    print("\n── Test 2: Alice gets FOLLOW_ACCEPTED notification ─")
+    print("\nTest 2: Alice gets FOLLOW_ACCEPTED notification")
     print("  Waiting for SQS → Lambda → DynamoDB...")
     notif = poll_notifications(alice_id, "FOLLOW_ACCEPTED")
     print(f"  Notification: {json.dumps(notif, indent=2, default=str)}")
     assert notif["senderId"] == bob_id
     print("Alice received FOLLOW_ACCEPTED notification")
 
-    # ── Test 3: Query notifications via GraphQL ───────────────
-    print("\n── Test 3: Alice fetches notifications via GraphQL ─")
+    print("\nTest 3: Alice fetches notifications via GraphQL")
     result = gql(
         alice_token,
         """
@@ -92,10 +88,9 @@ if __name__ == "__main__":
     print(f"  Latest: {json.dumps(notifs[0], indent=2)}")
     assert len(notifs) >= 1
     assert any(n["type"] == "FOLLOW_ACCEPTED" for n in notifs)
-    print("  ✅ GraphQL notifications query works")
+    print("GraphQL notifications query works")
 
-    # ── Test 4: Authorization — Bob cannot read Alice's notifs ─
-    print("\n── Test 4: Bob cannot read Alice's notifications ───")
+    print("\nTest 4: Bob cannot read Alice's notifications")
     # Bob's token queries getMyNotifications
     # He should only see HIS OWN — not Alice's
     result = gql(

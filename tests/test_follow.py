@@ -35,7 +35,7 @@ def get_user_id(username: str) -> str:
 
 
 if __name__ == "__main__":
-    print("\n── Setup: get tokens ────────────────────────")
+    print("\nSetup: get tokens")
     alice_token = get_token(USER_ALICE)
     bob_token   = get_token(USER_BOB)
     alice_id    = get_user_id(USER_ALICE["username"])
@@ -43,8 +43,7 @@ if __name__ == "__main__":
     print(f"  Alice: {alice_id}")
     print(f"  Bob:   {bob_id}")
 
-    # ── Test 1: Alice requests to follow Bob ──────────────────
-    print("\n── Test 1: Alice requests to follow Bob ─────")
+    print("\nTest 1: Alice requests to follow Bob")
     result = gql(
         alice_token,
         """
@@ -61,10 +60,9 @@ if __name__ == "__main__":
     )
     print(f"  Result: {json.dumps(result, indent=2)}")
     assert result["requestFollow"]["status"] == "PENDING", "Status should be PENDING"
-    print("  ✅ Follow request sent")
+    print("Follow request sent")
 
-    # ── Test 2: Bob checks his followers ─────────────────────
-    print("\n── Test 2: Bob checks getMyFollowers ────────")
+    print("\nTest 2: Bob checks getMyFollowers")
     result = gql(
         bob_token,
         """
@@ -79,10 +77,9 @@ if __name__ == "__main__":
     )
     print(f"  Result: {json.dumps(result, indent=2)}")
     assert any(f["status"] == "PENDING" for f in result["getMyFollowers"])
-    print("  ✅ Bob sees Alice's pending request")
+    print("Bob sees Alice's pending request")
 
-    # ── Test 3: Bob accepts Alice's follow request ────────────
-    print("\n── Test 3: Bob accepts Alice's request ──────")
+    print("\nTest 3: Bob accepts Alice's request")
     result = gql(
         bob_token,
         """
@@ -98,10 +95,9 @@ if __name__ == "__main__":
     )
     print(f"  Result: {json.dumps(result, indent=2)}")
     assert result["acceptFollowRequest"]["status"] == "ACCEPTED"
-    print("  ✅ Follow request accepted")
+    print("Follow request accepted")
 
-    # ── Test 4: Alice checks her followings ───────────────────
-    print("\n── Test 4: Alice checks getMyFollowings ─────")
+    print("\nTest 4: Alice checks getMyFollowings")
     result = gql(
         alice_token,
         """
@@ -116,10 +112,9 @@ if __name__ == "__main__":
     )
     print(f"  Result: {json.dumps(result, indent=2)}")
     assert any(f["status"] == "ACCEPTED" for f in result["getMyFollowings"])
-    print("  ✅ Alice sees Bob in her followings as ACCEPTED")
+    print("Alice sees Bob in her followings as ACCEPTED")
 
-    # ── Test 5: Authorization guard — Alice cannot accept her own request
-    print("\n── Test 5: Auth guard — Alice cannot accept as Bob ──")
+    print("\nTest 5: Auth guard — Alice cannot accept as Bob")
     try:
         gql(
             alice_token,   # Alice's token, but trying to accept Bob's request

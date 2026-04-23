@@ -14,7 +14,7 @@ def get_user_id(username: str) -> str:
 
 
 if __name__ == "__main__":
-    print("\n── Setup ────────────────────────────────────")
+    print("\nSetup")
     alice_token = get_token(USER_ALICE)
     bob_token   = get_token(USER_BOB)
     alice_id    = get_user_id(USER_ALICE["username"])
@@ -25,8 +25,7 @@ if __name__ == "__main__":
     print("\nWaiting 15s for stream sync...")
     time.sleep(15)
 
-    # ── Test 1: Bob searches his followers (Alice follows Bob) ────
-    print("\n── Test 1: Bob searches his followers ───────")
+    print("\nTest 1: Bob searches his followers")
     result = gql(
         bob_token,
         """
@@ -44,8 +43,7 @@ if __name__ == "__main__":
     assert result["searchMyFollowers"][0]["userId"] == alice_id
     print("  searchMyFollowers works")
 
-    # ── Test 2: Alice searches her followings (Alice follows Bob) ─
-    print("\n── Test 2: Alice searches her followings ────")
+    print("\nTest 2: Alice searches her followings")
     result = gql(
         alice_token,
         """
@@ -63,8 +61,7 @@ if __name__ == "__main__":
     assert result["searchMyFollowings"][0]["userId"] == bob_id
     print("   searchMyFollowings works")
 
-    # ── Test 3: Auth isolation — Alice cannot see Bob's followers ─
-    print("\n── Test 3: Auth isolation ───────────────────")
+    print("\nTest 3: Auth isolation")
     result = gql(
         alice_token,
         """

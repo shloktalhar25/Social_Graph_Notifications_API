@@ -12,7 +12,7 @@ class DynamoDBStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # ── Users Table ──────────────────────────────────────────────
+        # Users Table
         # PK: USER#<userId>   SK: PROFILE
         self.user_table = dynamodb.Table(
             self, "UserTable",
@@ -29,10 +29,9 @@ class DynamoDBStack(Stack):
             removal_policy=RemovalPolicy.DESTROY,  # easy cleanup during dev
         )
 
-        # ── Follow Table ─────────────────────────────────────────────
-        # Designed for querying in BOTH directions efficiently
-        # PK: USER#<userId>   SK: FOLLOWS#<targetId>  (who I follow)
-        # GSI PK: USER#<targetId>  SK: FOLLOWER#<userId>  (who follows me)
+        # Follow Table
+        # PK: USER#<userId>   SK: FOLLOWS#<targetId>
+        # GSI PK: USER#<targetId>  SK: FOLLOWER#<userId>
         self.follow_table = dynamodb.Table(
             self, "FollowTable",
             table_name="social-follows",
@@ -63,7 +62,7 @@ class DynamoDBStack(Stack):
             projection_type=dynamodb.ProjectionType.ALL,
         )
 
-        # ── Notification Table ────────────────────────────────────────
+        # Notification Table
         # PK: USER#<userId>   SK: NOTIF#<timestamp>#<uuid>
         self.notification_table = dynamodb.Table(
             self, "NotificationTable",

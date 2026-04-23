@@ -25,7 +25,7 @@ class SearchStack(Stack):
 
         opensearch_endpoint = f"https://{opensearch_domain.domain_endpoint}"
 
-        # ── DynamoDB → OpenSearch Sync Lambda ─────────────────────────
+        # DynamoDB to OpenSearch Sync Lambda
         self.sync_fn = _lambda.Function(
             self, "DynamoToOpenSearchFn",
             function_name="social-dynamo-opensearch-sync",
@@ -68,7 +68,7 @@ class SearchStack(Stack):
             )
         )
 
-        # ── Search Resolver Lambda ─────────────────────────────────────
+        # Search Resolver Lambda
         self.search_fn = _lambda.Function(
             self, "SearchResolverFn",
             function_name="social-search-resolver",
