@@ -32,7 +32,7 @@ search_stack = SearchStack(
     env=env,
 )
 
-# Queue lives inside AppSyncStack — no cross-stack SQS reference
+# Queue lives inside AppSyncStack - no cross-stack SQS reference
 appsync_stack = AppSyncStack(
     app, "SocialGraphAppSync",
     user_pool=cognito_stack.user_pool,
@@ -52,7 +52,7 @@ sqs_lambda_stack = SqsLambdaStack(
     env=env,
 )
 
-# Inject AppSync URL into processor — string reference, no CDK dependency
+# Inject AppSync URL into processor - string reference, no CDK dependency
 sqs_lambda_stack.notification_processor_fn.add_environment(
     "APPSYNC_API_URL", appsync_stack.api.graphql_url
 )

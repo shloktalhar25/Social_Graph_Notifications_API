@@ -34,5 +34,5 @@ def lambda_handler(event, context):
         ConditionExpression="attribute_not_exists(PK)",
     )
 
-    # Must return the event unchanged — Cognito requires this
+    # Must return the event unchanged - Cognito requires this
     return event

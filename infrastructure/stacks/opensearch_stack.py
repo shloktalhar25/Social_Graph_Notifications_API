@@ -21,15 +21,15 @@ class OpenSearchStack(Stack):
 
         # Service-Linked Role
         # Required for VPC-placed OpenSearch domains.
-        # Will fail if it already exists — that's fine, ignore the error.
+        # Will fail if it already exists - that's fine, ignore the error.
         # slr = iam.CfnServiceLinkedRole(
         #     self, "OpenSearchSLR",
         #     aws_service_name="es.amazonaws.com",
         # )
 
         # OpenSearch Domain
-        # 2x t3.small.search nodes across 2 AZs → green cluster health
-        # Not publicly accessible — IAM-only access policy
+        # 2x t3.small.search nodes across 2 AZs -> green cluster health
+        # Not publicly accessible - IAM-only access policy
         self.domain = opensearch.Domain(
             self, "SocialSearchDomain",
             domain_name="social-graph-search",
@@ -56,7 +56,7 @@ class OpenSearchStack(Stack):
             node_to_node_encryption=True,
             enforce_https=True,
 
-            # Fine-grained access control disabled — we use IAM resource policy
+            # Fine-grained access control disabled - we use IAM resource policy
             # which is simpler and sufficient for Lambda-only access
             access_policies=[
                 iam.PolicyStatement(

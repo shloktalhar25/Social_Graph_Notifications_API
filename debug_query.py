@@ -7,7 +7,7 @@ REGION   = "us-east-1"
 ENDPOINT = "https://search-social-graph-search-qjtysjhdc3s5ce3u6cgoo6ajoy.us-east-1.es.amazonaws.com"
 INDEX    = "social-follows"
 
-# From your debug output — Bob's ID is the targetId in the follow record
+# From your debug output - Bob's ID is the targetId in the follow record
 BOB_ID   = "5438e458-a071-70d8-2be0-437503a12235"
 ALICE_ID = "745884b8-7001-70fc-94f4-f84d962a3524"
 
@@ -26,7 +26,7 @@ client = OpenSearch(
     timeout=30,
 )
 
-# ── Test 1: Exact query the Lambda uses for searchMyFollowers ────
+# -- Test 1: Exact query the Lambda uses for searchMyFollowers ----
 print("=== TEST: targetId term query (what Lambda sends) ===")
 resp = client.search(index=INDEX, body={
     "query": {"bool": {"must": [
@@ -41,7 +41,7 @@ for h in resp["hits"]["hits"]:
 
 print()
 
-# ── Test 2: With .keyword suffix ─────────────────────────────────
+# -- Test 2: With .keyword suffix ---------------------------------
 print("=== TEST: targetId.keyword term query ===")
 resp = client.search(index=INDEX, body={
     "query": {"bool": {"must": [
@@ -56,7 +56,7 @@ for h in resp["hits"]["hits"]:
 
 print()
 
-# ── Test 3: Match all to confirm data ────────────────────────────
+# -- Test 3: Match all to confirm data ----------------------------
 print("=== TEST: match_all ===")
 resp = client.search(index=INDEX, body={"query": {"match_all": {}}, "size": 5})
 print(f"Total docs: {resp['hits']['total']['value']}")

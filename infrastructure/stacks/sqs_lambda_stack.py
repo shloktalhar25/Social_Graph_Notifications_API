@@ -17,7 +17,7 @@ class SqsLambdaStack(Stack):
         construct_id: str,
         notification_table,
         follow_table,
-        notification_queue,     # ← queue passed IN, created in AppSyncStack
+        notification_queue,     # <- queue passed IN, created in AppSyncStack
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)

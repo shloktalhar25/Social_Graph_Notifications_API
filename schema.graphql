@@ -1,11 +1,11 @@
 # schema.graphql
 
-# ── Auth directives ──────────────────────────────────────────
+# -- Auth directives ------------------------------------------
 # @aws_cognito_user_pools  = logged-in users only
 # @aws_iam                 = internal Lambda/IAM only
 # Both on a field = either auth mode works
 
-# ── Types ────────────────────────────────────────────────────
+# -- Types ----------------------------------------------------
 
 type User {
   userId: ID!
@@ -43,7 +43,7 @@ enum NotificationType {
   FOLLOW_ACCEPTED
 }
 
-# ── Queries ───────────────────────────────────────────────────
+# -- Queries ---------------------------------------------------
 
 type Query {
   # Get my followers (users who follow me)
@@ -66,7 +66,7 @@ type Query {
 
 }
 
-# ── Mutations ─────────────────────────────────────────────────
+# -- Mutations -------------------------------------------------
 
 type Mutation {
   # Send a follow request to another user
@@ -77,7 +77,7 @@ type Mutation {
   acceptFollowRequest(requesterId: ID!): FollowRelation!
     @aws_cognito_user_pools
 
-  # Internal only — used by notification processor Lambda via IAM
+  # Internal only - used by notification processor Lambda via IAM
   createNotification(
     recipientId: ID!
     senderId: ID!
@@ -88,7 +88,7 @@ type Mutation {
     @aws_iam
 }
 
-# ── Subscriptions ─────────────────────────────────────────────
+# -- Subscriptions ---------------------------------------------
 
 type Subscription {
   # Requester listens for their follow request being accepted

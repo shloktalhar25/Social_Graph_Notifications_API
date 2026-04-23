@@ -1,4 +1,4 @@
-# verify SQS → Lambda → DynamoDB
+# verify SQS -> Lambda -> DynamoDB
 
 import boto3
 import requests
@@ -25,7 +25,7 @@ def get_user_id(username: str) -> str:
 def poll_notifications(user_id: str, expected_type: str, retries=6, delay=5) -> dict:
     """
     Polls DynamoDB for a notification of the expected type.
-    SQS → Lambda is async so we retry with a small delay.
+    SQS -> Lambda is async so we retry with a small delay.
     """
     for attempt in range(retries):
         resp = notif_table.query(
@@ -39,7 +39,7 @@ def poll_notifications(user_id: str, expected_type: str, retries=6, delay=5) -> 
         ]
         if matches:
             return matches[-1]
-        print(f"  Attempt {attempt+1}/{retries} — not yet, waiting {delay}s...")
+        print(f"  Attempt {attempt+1}/{retries} - not yet, waiting {delay}s...")
         time.sleep(delay)
 
     raise AssertionError(f"Notification of type {expected_type} not found after {retries} retries")
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     bob_id      = get_user_id(USER_BOB["username"])
 
     print("\nTest 1: Bob gets FOLLOW_REQUEST notification")
-    print("  Waiting for SQS → Lambda → DynamoDB...")
+    print("  Waiting for SQS -> Lambda -> DynamoDB...")
     notif = poll_notifications(bob_id, "FOLLOW_REQUEST")
     print(f"  Notification: {json.dumps(notif, indent=2, default=str)}")
     assert notif["senderId"] == alice_id
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     print("Bob received FOLLOW_REQUEST notification")
 
     print("\nTest 2: Alice gets FOLLOW_ACCEPTED notification")
-    print("  Waiting for SQS → Lambda → DynamoDB...")
+    print("  Waiting for SQS -> Lambda -> DynamoDB...")
     notif = poll_notifications(alice_id, "FOLLOW_ACCEPTED")
     print(f"  Notification: {json.dumps(notif, indent=2, default=str)}")
     assert notif["senderId"] == bob_id
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
     print("\nTest 4: Bob cannot read Alice's notifications")
     # Bob's token queries getMyNotifications
-    # He should only see HIS OWN — not Alice's
+    # He should only see HIS OWN - not Alice's
     result = gql(
         bob_token,
         "query { getMyNotifications { notificationId type recipientId } }",

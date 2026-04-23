@@ -12,14 +12,14 @@ queue_url = os.environ["NOTIFICATION_QUEUE_URL"]
 
 
 def lambda_handler(event, context):
-    # ── 1. Extract caller identity ────────────────────────────
+    # -- 1. Extract caller identity ----------------------------
     claims = event["identity"]["claims"]
     acceptor_id = claims["sub"]           # the person accepting
     acceptor_username = claims["cognito:username"]
 
     requester_id = event["arguments"]["requesterId"]
 
-    # ── 2. Authorization: only the recipient can accept ───────
+    # -- 2. Authorization: only the recipient can accept -------
     # Fetch the follow record
     follow_resp = follow_table.get_item(
         Key={
@@ -42,7 +42,7 @@ def lambda_handler(event, context):
 
     now = datetime.now(timezone.utc).isoformat()
 
-    # ── 3. Update status to ACCEPTED ─────────────────────────
+    # -- 3. Update status to ACCEPTED -------------------------
     follow_table.update_item(
         Key={
             "PK": f"USER#{requester_id}",
@@ -59,13 +59,13 @@ def lambda_handler(event, context):
         ConditionExpression="#s = :pending",
     )
 
-    # ── 4. Fetch requester info for the response ──────────────
+    # -- 4. Fetch requester info for the response --------------
     requester_resp = user_table.get_item(
         Key={"PK": f"USER#{requester_id}", "SK": "PROFILE"}
     )
     requester = requester_resp.get("Item", {})
 
-    # ── 5. Publish FOLLOW_ACCEPTED event to SQS ───────────────
+    # -- 5. Publish FOLLOW_ACCEPTED event to SQS ---------------
     sqs.send_message(
         QueueUrl=queue_url,
         MessageBody=json.dumps({

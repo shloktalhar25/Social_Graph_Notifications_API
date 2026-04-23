@@ -75,7 +75,7 @@ if __name__ == "__main__":
     )
     for f in result["searchMyFollowers"]:
         assert f["userId"] != bob_id, \
-            " Alice saw Bob in her followers — auth leak!"
+            " Alice saw Bob in her followers - auth leak!"
     print("  Auth isolation correct")
 
     print("\n All search tests passed")

@@ -23,7 +23,7 @@ def lambda_handler(event, context):
     return [
     {
         "userId": item["targetId"],
-        "username": item.get("targetUsername", ""),      # ← was empty before
+        "username": item.get("targetUsername", ""),      # <- was empty before
         "status": item["status"],
         "createdAt": item["createdAt"],
     }

@@ -47,36 +47,36 @@ A production-oriented GraphQL backend for a social application built on AWS. Sup
 
 ```
 social-graph-api/
-├── infrastructure/
-│   ├── app.py
-│   └── stacks/
-│       ├── cognito_stack.py
-│       ├── dynamodb_stack.py
-│       ├── appsync_stack.py
-│       ├── sqs_lambda_stack.py
-│       ├── opensearch_stack.py
-│       └── search_stack.py
-├── functions/
-│   ├── post_confirmation/
-│   ├── resolvers/
-│   │   ├── request_follow/
-│   │   ├── accept_follow/
-│   │   ├── get_followers/
-│   │   ├── get_followings/
-│   │   ├── get_notifications/
-│   │   └── create_notification/
-│   ├── notification_processor/
-│   ├── opensearch_sync/
-│   └── search_resolver/
-├── tests/
-│   ├── config.py
-│   ├── test_auth.py
-│   ├── test_follow.py
-│   ├── test_notifications.py
-│   └── test_search.py
-├── schema.graphql
-├── cdk.json
-└── requirements.txt
++-- infrastructure/
+|   +-- app.py
+|   `-- stacks/
+|       +-- cognito_stack.py
+|       +-- dynamodb_stack.py
+|       +-- appsync_stack.py
+|       +-- sqs_lambda_stack.py
+|       +-- opensearch_stack.py
+|       `-- search_stack.py
++-- functions/
+|   +-- post_confirmation/
+|   +-- resolvers/
+|   |   +-- request_follow/
+|   |   +-- accept_follow/
+|   |   +-- get_followers/
+|   |   +-- get_followings/
+|   |   +-- get_notifications/
+|   |   `-- create_notification/
+|   +-- notification_processor/
+|   +-- opensearch_sync/
+|   `-- search_resolver/
++-- tests/
+|   +-- config.py
+|   +-- test_auth.py
+|   +-- test_follow.py
+|   +-- test_notifications.py
+|   `-- test_search.py
++-- schema.graphql
++-- cdk.json
+`-- requirements.txt
 ```
 
 ---

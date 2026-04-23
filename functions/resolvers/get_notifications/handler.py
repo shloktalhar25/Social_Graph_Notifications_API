@@ -19,7 +19,7 @@ def lambda_handler(event, context):
             Key("SK").begins_with("NOTIF#")
         ),
         ScanIndexForward=False,   # newest first
-        Limit=50,                 # page size — keep it bounded
+        Limit=50,                 # page size - keep it bounded
     )
 
     return [

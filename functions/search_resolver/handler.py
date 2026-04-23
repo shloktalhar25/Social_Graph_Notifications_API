@@ -28,10 +28,10 @@ client = OpenSearch(
 def lambda_handler(event, context):
     """
     Handles two fields:
-      searchMyFollowers(searchTerm: String!)  — who follows ME
-      searchMyFollowings(searchTerm: String!) — who I follow
+      searchMyFollowers(searchTerm: String!)  - who follows ME
+      searchMyFollowings(searchTerm: String!) - who I follow
     """
-    # ── 1. Extract caller identity (never trust arguments for auth) ──
+    # -- 1. Extract caller identity (never trust arguments for auth) --
     claims      = event["identity"]["claims"]
     caller_id   = claims["sub"]
     field_name  = event["info"]["fieldName"]

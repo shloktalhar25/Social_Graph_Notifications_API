@@ -21,7 +21,7 @@ def lambda_handler(event, context):
     return [
     {
         "userId": item["requesterId"],
-        "username": item.get("requesterUsername", ""),   # ← was empty before
+        "username": item.get("requesterUsername", ""),   # <- was empty before
         "status": item["status"],
         "createdAt": item["createdAt"],
     }

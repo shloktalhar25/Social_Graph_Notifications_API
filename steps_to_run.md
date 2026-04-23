@@ -49,7 +49,7 @@ aws sts get-caller-identity
 
 ---
 
-## Step 1 — Clone and set up the environment
+## Step 1 - Clone and set up the environment
 
 ```bash
 git clone <repo-url>
@@ -70,7 +70,7 @@ pip install -r requirements.txt
 
 ---
 
-## Step 2 — Install Lambda dependencies
+## Step 2 - Install Lambda dependencies
 
 Lambda functions require Python packages bundled locally (no Docker needed):
 
@@ -82,7 +82,7 @@ pip install opensearch-py requests-aws4auth -t functions/search_resolver/
 
 ---
 
-## Step 3 — Bootstrap CDK
+## Step 3 - Bootstrap CDK
 
 These are one-time setup commands per AWS account:
 
@@ -99,7 +99,7 @@ cdk bootstrap aws://ACCOUNT_ID/us-east-1
 
 ---
 
-## Step 4 — Deploy all stacks
+## Step 4 - Deploy all stacks
 
 ```bash
 cdk deploy --all --require-approval never
@@ -107,7 +107,7 @@ cdk deploy --all --require-approval never
 
 > This takes approximately 20 minutes. OpenSearch domain provisioning is the slow step.
 
-At the end of deployment, note these output values — you will need them in Step 5:
+At the end of deployment, note these output values - you will need them in Step 5:
 
 ```
 SocialGraphCognito.UserPoolId        = us-east-1_XXXXXXXXX
@@ -126,7 +126,7 @@ aws cloudformation describe-stacks --stack-name SocialGraphAppSync \
 
 ---
 
-## Step 5 — Configure tests
+## Step 5 - Configure tests
 
 Open `tests/config.py` and fill in the values from Step 4:
 
@@ -137,14 +137,14 @@ APPSYNC_URL  = "https://XXXX.appsync-api.us-east-1.amazonaws.com/graphql"
 
 REGION = "us-east-1"
 
-# Test user credentials — these will be created fresh
+# Test user credentials - these will be created fresh
 USER_ALICE = {"username": "alice", "password": "Test1234!", "email": "alice@example.com"}
 USER_BOB   = {"username": "bob",   "password": "Test1234!", "email": "bob@example.com"}
 ```
 
 ---
 
-## Step 6 — Run the test suite
+## Step 6 - Run the test suite
 
 Run each script in this exact order:
 
@@ -175,7 +175,7 @@ Follow request sent
 Bob sees Alice's pending request
 Follow request accepted
 Alice sees Bob in her followings as ACCEPTED
-Correctly rejected  ← auth guard working
+Correctly rejected  <- auth guard working
 All follow tests passed
 ```
 
@@ -208,46 +208,46 @@ All search tests passed
 
 ---
 
-## Step 7 — Verify in AWS Console (optional)
+## Step 7 - Verify in AWS Console (optional)
 
 ### DynamoDB
-- `social-users` — should contain user records with `PK = USER#<id>`
-- `social-follows` — should contain follow records; check `GSI-FollowerIndex` exists
-- `social-notifications` — should contain notification records with `SK = NOTIF#<timestamp>#<uuid>`
+- `social-users` - should contain user records with `PK = USER#<id>`
+- `social-follows` - should contain follow records; check `GSI-FollowerIndex` exists
+- `social-notifications` - should contain notification records with `SK = NOTIF#<timestamp>#<uuid>`
 
 ### AppSync
-- Go to AWS AppSync → APIs → `social-graph-api`
+- Go to AWS AppSync -> APIs -> `social-graph-api`
 - Confirm authorization modes: Cognito User Pools (default) + IAM (additional)
-- Go to Schema — confirm all types and mutations are present
-- Go to Data sources — confirm 8 Lambda data sources are attached
+- Go to Schema - confirm all types and mutations are present
+- Go to Data sources - confirm 8 Lambda data sources are attached
 
 ### SQS
-- `social-notifi-queue` — check Monitoring tab; NumberOfMessagesSent should match NumberOfMessagesDeleted
-- `social-notif-dlq` — ApproximateNumberOfMessages should be 0
+- `social-notifi-queue` - check Monitoring tab; NumberOfMessagesSent should match NumberOfMessagesDeleted
+- `social-notif-dlq` - ApproximateNumberOfMessages should be 0
 
 ### OpenSearch
-- Go to Amazon OpenSearch Service → Domains → `social-graph-search`
+- Go to Amazon OpenSearch Service -> Domains -> `social-graph-search`
 - Cluster health should show Green
 - Instance count: 2 x t3.small.search
 
 ---
 
-## Step 8 — Check Lambda logs
+## Step 8 - Check Lambda logs
 
 ```bash
-# Notification processor — confirm it called AppSync mutation
+# Notification processor - confirm it called AppSync mutation
 aws logs tail /aws/lambda/social-notification-processor --since 1h
 
-# OpenSearch sync Lambda — confirm it indexed follow records
+# OpenSearch sync Lambda - confirm it indexed follow records
 aws logs tail /aws/lambda/social-dynamo-opensearch-sync --since 1h
 
-# Search resolver — confirm it executed OpenSearch queries
+# Search resolver - confirm it executed OpenSearch queries
 aws logs tail /aws/lambda/social-search-resolver --since 1h
 ```
 
 ---
 
-## Step 9 — Teardown
+## Step 9 - Teardown
 
 ```bash
 cdk destroy --all
@@ -259,36 +259,36 @@ cdk destroy --all
 
 ```
 social-graph-api/
-├── infrastructure/
-│   ├── app.py
-│   └── stacks/
-│       ├── cognito_stack.py
-│       ├── dynamodb_stack.py
-│       ├── appsync_stack.py
-│       ├── sqs_lambda_stack.py
-│       ├── opensearch_stack.py
-│       └── search_stack.py
-├── functions/
-│   ├── post_confirmation/
-│   ├── resolvers/
-│   │   ├── request_follow/
-│   │   ├── accept_follow/
-│   │   ├── get_followers/
-│   │   ├── get_followings/
-│   │   ├── get_notifications/
-│   │   └── create_notification/
-│   ├── notification_processor/
-│   ├── opensearch_sync/
-│   └── search_resolver/
-├── tests/
-│   ├── config.py
-│   ├── test_auth.py
-│   ├── test_follow.py
-│   ├── test_notifications.py
-│   └── test_search.py
-├── schema.graphql
-├── cdk.json
-└── requirements.txt
++-- infrastructure/
+|   +-- app.py
+|   `-- stacks/
+|       +-- cognito_stack.py
+|       +-- dynamodb_stack.py
+|       +-- appsync_stack.py
+|       +-- sqs_lambda_stack.py
+|       +-- opensearch_stack.py
+|       `-- search_stack.py
++-- functions/
+|   +-- post_confirmation/
+|   +-- resolvers/
+|   |   +-- request_follow/
+|   |   +-- accept_follow/
+|   |   +-- get_followers/
+|   |   +-- get_followings/
+|   |   +-- get_notifications/
+|   |   `-- create_notification/
+|   +-- notification_processor/
+|   +-- opensearch_sync/
+|   `-- search_resolver/
++-- tests/
+|   +-- config.py
+|   +-- test_auth.py
+|   +-- test_follow.py
+|   +-- test_notifications.py
+|   `-- test_search.py
++-- schema.graphql
++-- cdk.json
+`-- requirements.txt
 ```
 
 ---

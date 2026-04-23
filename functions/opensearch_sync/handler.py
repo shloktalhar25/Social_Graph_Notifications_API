@@ -28,7 +28,7 @@ client = OpenSearch(
     timeout=30,
 )
 
-# ── Index mapping (created on first sync if not exists) ──────────
+# --- Index mapping (created on first sync if not exists) ---
 INDEX_MAPPING = {
     "settings": {
         "number_of_replicas": 1,    # 1 replica across 2 nodes = green health
@@ -111,7 +111,7 @@ def _process_record(record: dict):
     }
     print("FINAL DOC:", doc)
 
-    client.index(index=INDEX, id=doc_id, body=doc)   # ✅ FIX 2
+    client.index(index=INDEX, id=doc_id, body=doc)   # FIX 2
 
     print(f"Indexed doc: {doc_id} status={doc['status']}")
 

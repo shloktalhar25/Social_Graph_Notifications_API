@@ -29,7 +29,7 @@ def create_and_confirm_user(user: dict) -> str:
     except cognito.exceptions.UsernameExistsException:
         print(f"  User already exists: {user['username']}")
 
-    # Admin confirm — bypasses email verification
+    # Admin confirm - bypasses email verification
     cognito.admin_confirm_sign_up(
         UserPoolId=USER_POOL_ID,
         Username=user["username"],

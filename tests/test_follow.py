@@ -12,7 +12,7 @@ cognito = boto3.client("cognito-idp", region_name="us-east-1")
 
 
 def gql(token: str, query: str, variables: dict = None) -> dict:
-    """Helper — sends a GraphQL request with Cognito token auth."""
+    """Helper - sends a GraphQL request with Cognito token auth."""
     resp = requests.post(
         APPSYNC_URL,
         headers={
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     assert any(f["status"] == "ACCEPTED" for f in result["getMyFollowings"])
     print("Alice sees Bob in her followings as ACCEPTED")
 
-    print("\nTest 5: Auth guard — Alice cannot accept as Bob")
+    print("\nTest 5: Auth guard - Alice cannot accept as Bob")
     try:
         gql(
             alice_token,   # Alice's token, but trying to accept Bob's request
