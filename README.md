@@ -44,36 +44,49 @@ A production-oriented GraphQL backend for a social application built on AWS. Sup
 ```
 social-graph-api/
 ├── infrastructure/
-│   ├── app.py                        # CDK entry point — stack wiring
+│   ├── app.py
 │   └── stacks/
-│       ├── cognito_stack.py          # User Pool + post-confirmation trigger
-│       ├── dynamodb_stack.py         # All DynamoDB tables + GSI
-│       ├── appsync_stack.py          # GraphQL API + Lambda resolvers
-│       ├── sqs_lambda_stack.py       # Notification processor Lambda
-│       ├── opensearch_stack.py       # OpenSearch 2-node domain
-│       └── search_stack.py           # DynamoDB Streams sync + search resolver
+│       ├── cognito_stack.py
+│       ├── dynamodb_stack.py
+│       ├── appsync_stack.py
+│       ├── sqs_lambda_stack.py
+│       ├── opensearch_stack.py
+│       └── search_stack.py
 ├── functions/
-│   ├── post_confirmation/            # Cognito trigger → persists user profile
+│   ├── post_confirmation/
 │   ├── resolvers/
-│   │   ├── request_follow/           # Mutation: send follow request
-│   │   ├── accept_follow/            # Mutation: accept follow request
-│   │   ├── get_followers/            # Query: who follows me
-│   │   ├── get_followings/           # Query: who I follow
-│   │   ├── get_notifications/        # Query: my notifications
-│   │   └── create_notification/      # Mutation: IAM-only, triggered by processor
-│   ├── notification_processor/       # SQS consumer → calls AppSync CreateNotification
-│   ├── opensearch_sync/              # DynamoDB Streams → OpenSearch sync
-│   └── search_resolver/              # OpenSearch search handlers
+│   │   ├── request_follow/
+│   │   ├── accept_follow/
+│   │   ├── get_followers/
+│   │   ├── get_followings/
+│   │   ├── get_notifications/
+│   │   └── create_notification/
+│   ├── notification_processor/
+│   ├── opensearch_sync/
+│   └── search_resolver/
 ├── tests/
-│   ├── config.py                     # Deployment output values
-│   ├── test_auth.py                  # User creation + Cognito tokens
-│   ├── test_follow.py                # Follow flow + auth guards
-│   ├── test_notifications.py         # Async notification pipeline
-│   └── test_search.py                # OpenSearch integration tests
-├── schema.graphql                    # AppSync GraphQL schema
+│   ├── config.py
+│   ├── test_auth.py
+│   ├── test_follow.py
+│   ├── test_notifications.py
+│   └── test_search.py
+├── schema.graphql
 ├── cdk.json
 └── requirements.txt
 ```
+
+---
+
+## Proof of Working
+
+The following screenshots demonstrate the successful deployment and execution of the test suite, covering authentication, follow relationships, asynchronous notifications, and OpenSearch-powered search.
+
+![Auth and User Setup](PicsAndSs/1.png)
+![Follow Flow and Authorization](PicsAndSs/2.png)
+![Notification Pipeline](PicsAndSs/3.png)
+![OpenSearch Search Results](PicsAndSs/4.png)
+![AWS Console Verification - DynamoDB](PicsAndSs/5.png)
+![AWS Console Verification - OpenSearch](PicsAndSs/6.png)
 
 ---
 

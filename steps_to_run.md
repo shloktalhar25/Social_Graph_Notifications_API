@@ -260,26 +260,26 @@ cdk destroy --all
 ```
 social-graph-api/
 ├── infrastructure/
-│   ├── app.py                          # CDK entry point
+│   ├── app.py
 │   └── stacks/
-│       ├── cognito_stack.py            # Cognito User Pool
-│       ├── dynamodb_stack.py           # DynamoDB tables
-│       ├── appsync_stack.py            # AppSync API + resolvers
-│       ├── sqs_lambda_stack.py         # Notification processor
-│       ├── opensearch_stack.py         # OpenSearch domain
-│       └── search_stack.py             # DynamoDB sync + search resolver
+│       ├── cognito_stack.py
+│       ├── dynamodb_stack.py
+│       ├── appsync_stack.py
+│       ├── sqs_lambda_stack.py
+│       ├── opensearch_stack.py
+│       └── search_stack.py
 ├── functions/
-│   ├── post_confirmation/              # Cognito trigger
+│   ├── post_confirmation/
 │   ├── resolvers/
-│   │   ├── request_follow/             # Follow request mutation
-│   │   ├── accept_follow/              # Accept request mutation
-│   │   ├── get_followers/              # Followers query
-│   │   ├── get_followings/             # Followings query
-│   │   ├── get_notifications/          # Notifications query
-│   │   └── create_notification/        # IAM mutation
-│   ├── notification_processor/         # SQS consumer
-│   ├── opensearch_sync/                # DynamoDB Streams sync
-│   └── search_resolver/                # OpenSearch search
+│   │   ├── request_follow/
+│   │   ├── accept_follow/
+│   │   ├── get_followers/
+│   │   ├── get_followings/
+│   │   ├── get_notifications/
+│   │   └── create_notification/
+│   ├── notification_processor/
+│   ├── opensearch_sync/
+│   └── search_resolver/
 ├── tests/
 │   ├── config.py
 │   ├── test_auth.py
