@@ -2,6 +2,10 @@
 
 A production-oriented GraphQL backend for a social application built on AWS. Supports user management, a bidirectional follow system with request/accept flow, asynchronous real-time notifications, and full-text search powered by Amazon OpenSearch Service.
 
+<p align="center">
+  <img src="PicsAndSs/architecture.png" alt="Architecture Diagram" width="800">
+</p>
+
 ---
 # Request Flow: Follow System
 
@@ -77,16 +81,33 @@ social-graph-api/
 
 ---
 
-## Proof of Working
+## Deployment Verification
 
-The following screenshots demonstrate the successful deployment and execution of the test suite, covering authentication, follow relationships, asynchronous notifications, and OpenSearch-powered search.
+The implementation has been verified through a suite of integration tests and console audits. The following images provide proof of the system's operational status across all core services.
 
+### User Authentication and Security
 ![Auth and User Setup](PicsAndSs/1.png)
+Verified Cognito user pool configuration and secure authentication flow for test accounts.
+
+### Follow System and Access Control
 ![Follow Flow and Authorization](PicsAndSs/2.png)
+Demonstration of the follow request lifecycle and authorization logic preventing unauthorized relationship management.
+
+### Real-time Notifications
 ![Notification Pipeline](PicsAndSs/3.png)
+Confirmation of the asynchronous processing pipeline, from SQS event ingestion to AppSync subscription delivery.
+
+### Search and Discovery
 ![OpenSearch Search Results](PicsAndSs/4.png)
+Proof of real-time data synchronization between DynamoDB and OpenSearch, enabling full-text search capabilities.
+
+### AWS Infrastructure - DynamoDB
 ![AWS Console Verification - DynamoDB](PicsAndSs/5.png)
+Overview of the single-table architecture and indexed relationship data.
+
+### AWS Infrastructure - OpenSearch
 ![AWS Console Verification - OpenSearch](PicsAndSs/6.png)
+Verification of the OpenSearch cluster health and indexed document counts.
 
 ---
 
